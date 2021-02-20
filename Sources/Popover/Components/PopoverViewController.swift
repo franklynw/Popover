@@ -32,7 +32,7 @@ class PopoverViewController<Content: View>: UIViewController, UIPopoverPresentat
         
         switch style {
         case .notification(let content):
-            let storyboard = UIStoryboard(name: "NotificationViewController", bundle: nil)
+            let storyboard = UIStoryboard(name: "NotificationViewController", bundle: Bundle.module)
             let notificationViewController = storyboard.instantiateInitialViewController() as! NotificationViewController
             notificationViewController.content = content
             viewController = notificationViewController

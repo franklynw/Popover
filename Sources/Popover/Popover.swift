@@ -7,7 +7,7 @@
 import SwiftUI
 
 
-struct Popover<Content: View>: View {
+public struct Popover<Content: View>: View {
     
     @Binding private var isPresented: Bool
     
@@ -15,13 +15,13 @@ struct Popover<Content: View>: View {
     private let style: PopoverStyle<Content>
     
     
-    init(forId id: String, isPresented: Binding<Bool>, style: PopoverStyle<Content>) {
+    public init(forId id: String, isPresented: Binding<Bool>, style: PopoverStyle<Content>) {
         self.id = id
         _isPresented = isPresented
         self.style = style
     }
     
-    var body: some View {
+    public var body: some View {
         
         DoIf($isPresented) {
             Presenter.present(for: id, isPresented: $isPresented, style: style)

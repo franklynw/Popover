@@ -11,7 +11,7 @@
         <!--Notification View Controller-->
         <scene sceneID="0Q2-3L-coE">
             <objects>
-                <viewController storyboardIdentifier="NotificationViewController" id="Hea-9M-D55" customClass="NotificationViewController" customModule="Simplist" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="NotificationViewController" id="Hea-9M-D55" customClass="NotificationViewController" customModule="Popover" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="M2V-3Q-oZR">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
