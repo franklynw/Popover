@@ -42,12 +42,12 @@
                             <constraint firstItem="Fdo-Vd-F3K" firstAttribute="width" secondItem="M2V-3Q-oZR" secondAttribute="width" multiplier="0.9" id="GuC-sD-gRO"/>
                             <constraint firstItem="Ug3-QW-ikh" firstAttribute="top" secondItem="Fdo-Vd-F3K" secondAttribute="bottom" constant="8" id="Koh-Ow-KzR"/>
                             <constraint firstItem="Fdo-Vd-F3K" firstAttribute="centerX" secondItem="M2V-3Q-oZR" secondAttribute="centerX" id="ZaP-rY-Uf1"/>
-                            <constraint firstItem="jUG-uR-VbU" firstAttribute="top" secondItem="IqV-15-EvY" secondAttribute="top" id="cTT-Np-Hda"/>
+                            <constraint firstItem="jUG-uR-VbU" firstAttribute="top" secondItem="M2V-3Q-oZR" secondAttribute="top" id="cTT-Np-Hda"/>
                             <constraint firstItem="Ug3-QW-ikh" firstAttribute="centerX" secondItem="M2V-3Q-oZR" secondAttribute="centerX" id="dLm-Io-01L"/>
                             <constraint firstItem="Ug3-QW-ikh" firstAttribute="width" secondItem="M2V-3Q-oZR" secondAttribute="width" multiplier="0.9" id="fls-Ds-bqV"/>
                             <constraint firstItem="Ug3-QW-ikh" firstAttribute="bottom" secondItem="jUG-uR-VbU" secondAttribute="bottom" constant="-8" id="sqO-uO-bCH"/>
-                            <constraint firstItem="jUG-uR-VbU" firstAttribute="trailing" secondItem="IqV-15-EvY" secondAttribute="trailing" id="t2c-AO-Dk4"/>
-                            <constraint firstItem="jUG-uR-VbU" firstAttribute="leading" secondItem="IqV-15-EvY" secondAttribute="leading" id="yKz-Fh-bVJ"/>
+                            <constraint firstItem="jUG-uR-VbU" firstAttribute="trailing" secondItem="M2V-3Q-oZR" secondAttribute="trailing" id="t2c-AO-Dk4"/>
+                            <constraint firstItem="jUG-uR-VbU" firstAttribute="leading" secondItem="M2V-3Q-oZR" secondAttribute="leading" id="yKz-Fh-bVJ"/>
                         </constraints>
                     </view>
                     <connections>
