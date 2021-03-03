@@ -21,11 +21,11 @@ public enum PopoverStyle<Content: View> {
     public static func notification(_ content: PopoverNotificationContent) -> PopoverStyle<AnyView> {
         return .notification(content: content)
     }
-    public static func customSize<T>(_ size: CGSize, content: @escaping () -> T) -> PopoverStyle<T> {
-        return PopoverStyle<T>.customSize(size: size, content: content)
+    public static func customSize(_ size: CGSize, content: @escaping () -> Content) -> PopoverStyle<Content> {
+        return .customSize(size: size, content: content)
     }
-    public static func customProportion<T>(_ proportion: CGSize, content: @escaping () -> T) -> PopoverStyle<T> {
-        return PopoverStyle<T>.customProportion(proportion: proportion, content: content)
+    public static func customProportion(_ proportion: CGSize, content: @escaping () -> Content) -> PopoverStyle<Content> {
+        return .customProportion(proportion: proportion, content: content)
     }
     
     
