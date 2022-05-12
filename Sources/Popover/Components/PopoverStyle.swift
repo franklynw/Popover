@@ -18,29 +18,14 @@ public enum PopoverStyle<Content: View> {
     case customSize(size: CGSize, content: () -> Content)
     case customProportion(proportion: CGSize, content: () -> Content)
     
-    static func system<T>(_ content: @escaping () -> T) -> PopoverStyle<T> {
-        return PopoverStyle<T>.system(content: content)
-    }
-    static func tiny<T>(_ content: @escaping () -> T) -> PopoverStyle<T> {
-        return PopoverStyle<T>.tiny(content: content)
-    }
-    static func small<T>(_ content: @escaping () -> T) -> PopoverStyle<T> {
-        return PopoverStyle<T>.small(content: content)
-    }
-    static func medium<T>(_ content: @escaping () -> T) -> PopoverStyle<T> {
-        return PopoverStyle<T>.medium(content: content)
-    }
-    static func large<T>(_ content: @escaping () -> T) -> PopoverStyle<T> {
-        return PopoverStyle<T>.large(content: content)
-    }
-    static func notification(_ content: PopoverNotificationContent) -> PopoverStyle<AnyView> {
+    public static func notification(_ content: PopoverNotificationContent) -> PopoverStyle<AnyView> {
         return .notification(content: content)
     }
-    static func customSize<T>(_ size: CGSize, content: @escaping () -> T) -> PopoverStyle<T> {
-        return PopoverStyle<T>.customSize(size: size, content: content)
+    public static func customSize(_ size: CGSize, content: @escaping () -> Content) -> PopoverStyle<Content> {
+        return .customSize(size: size, content: content)
     }
-    static func customProportion<T>(_ proportion: CGSize, content: @escaping () -> T) -> PopoverStyle<T> {
-        return PopoverStyle<T>.customProportion(proportion: proportion, content: content)
+    public static func customProportion(_ proportion: CGSize, content: @escaping () -> Content) -> PopoverStyle<Content> {
+        return .customProportion(proportion: proportion, content: content)
     }
     
     

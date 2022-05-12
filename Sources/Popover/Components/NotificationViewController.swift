@@ -16,6 +16,9 @@ class NotificationViewController: UIViewController {
     
     var content: PopoverNotificationContent!
     
+    private var gradientLayer: CAGradientLayer?
+    
+    
     static func height(for content: PopoverNotificationContent, inContainerWidth containerWidth: CGFloat) -> CGFloat {
         
         let size = CGSize(width: containerWidth * 0.9, height: .greatestFiniteMagnitude)
@@ -62,12 +65,33 @@ class NotificationViewController: UIViewController {
         case .flat(let color):
             backgroundView.backgroundColor = color
         case .gradient(let color):
-            let gradientLayer = CAGradientLayer()
-            gradientLayer.frame = backgroundView.bounds
-            gradientLayer.colors = [color.cgColor, color.withAlphaComponent(0.5).cgColor]
-            backgroundView.layer.addSublayer(gradientLayer)
+            makeGradient(color)
         case .none:
             break
         }
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        if case .gradient(let color) = content.backgroundColor {
+            makeGradient(color)
+        }
+    }
+    
+    private func makeGradient(_ color: UIColor) {
+        
+        let gradientLayer: CAGradientLayer
+        
+        if let layer = self.gradientLayer {
+            gradientLayer = layer
+        } else {
+            gradientLayer = CAGradientLayer()
+            backgroundView.layer.addSublayer(gradientLayer)
+            self.gradientLayer = gradientLayer
+        }
+        
+        gradientLayer.frame = backgroundView.bounds
+        gradientLayer.colors = [color.cgColor, color.withAlphaComponent(0.5).cgColor]
     }
 }

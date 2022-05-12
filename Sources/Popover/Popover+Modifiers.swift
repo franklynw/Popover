@@ -37,3 +37,13 @@ struct PopoverPresentationModifier<PopoverContent>: ViewModifier where PopoverCo
         }
     }
 }
+
+
+extension Popover {
+    
+    public func userInterfaceStyle(_ userInterfaceStyle: UIUserInterfaceStyle) -> Self {
+        var copy = self
+        copy.userInterfaceStyle = userInterfaceStyle
+        return copy
+    }
+}
