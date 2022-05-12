@@ -11,8 +11,10 @@ public struct Popover<Content: View>: View {
     
     @Binding private var isPresented: Bool
     
-    private let id: String
-    private let style: PopoverStyle<Content>
+    internal let id: String
+    internal let style: PopoverStyle<Content>
+    
+    internal var userInterfaceStyle: UIUserInterfaceStyle = .unspecified
     
     
     public init(forId id: String, isPresented: Binding<Bool>, style: PopoverStyle<Content>) {
@@ -24,7 +26,7 @@ public struct Popover<Content: View>: View {
     public var body: some View {
         
         DoIf($isPresented) {
-            Presenter.present(for: id, isPresented: $isPresented, style: style)
+            Presenter.present(with: self, isPresented: $isPresented)
         } else: {
             Presenter.dismiss(for: id)
         }

@@ -26,7 +26,7 @@ class PopoverViewController<Content: View>: UIViewController, UIPopoverPresentat
         fatalError("init(coder:) has not been implemented")
     }
 
-    func present() {
+    func present(with parent: Popover<Content>, completion: @escaping () -> ()) {
         
         var viewController: UIViewController
         
@@ -44,6 +44,7 @@ class PopoverViewController<Content: View>: UIViewController, UIPopoverPresentat
         }
         
         viewController.modalPresentationStyle = .popover
+        viewController.overrideUserInterfaceStyle = parent.userInterfaceStyle
         
         if let popoverSize = style.size {
             viewController.preferredContentSize = popoverSize
@@ -68,6 +69,8 @@ class PopoverViewController<Content: View>: UIViewController, UIPopoverPresentat
                     Presenter.dismiss(for: self.id)
                 }
             }
+            
+            completion()
         }
     }
     
