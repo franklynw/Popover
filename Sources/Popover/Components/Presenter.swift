@@ -19,9 +19,6 @@ class Presenter {
         guard let appWindow = UIApplication.window else {
             return
         }
-        guard window == nil else {
-            return
-        }
         
         UIApplication.endEditing()
         
@@ -62,7 +59,8 @@ class Presenter {
             window?.alpha = 0
             viewController?.view.alpha = 0
         } completion: { _ in
-            window = nil
+            viewController?.view.removeFromSuperview()
+            window?.isHidden = true
             viewController = nil
             presenting[id]?.wrappedValue = false
             presenting.removeValue(forKey: id)
