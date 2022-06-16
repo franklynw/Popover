@@ -32,3 +32,32 @@ public struct Popover<Content: View>: View {
         }
     }
 }
+
+
+public struct PopoverSheet<Content: View, T: Identifiable, EnvironmentObject: ObservableObject>: View {
+    
+    @Binding var activeSheet: T?
+    
+    internal let id: String
+    internal let style: PopoverStyle<Content>
+    
+    internal var userInterfaceStyle: UIUserInterfaceStyle = .unspecified
+    internal var environmentObject: EnvironmentObject?
+    
+    
+    public init(forId id: String, activeSheet: Binding<T?>, style: PopoverStyle<Content>) {
+        self.id = id
+        _activeSheet = activeSheet
+        self.style = style
+    }
+    
+    @ViewBuilder
+    public var body: some View {
+        
+        DoIfLet($activeSheet) {
+            ActiveSheetPresenter.present(with: self, activeSheet: $activeSheet)
+        } else: {
+            ActiveSheetPresenter.dismiss(for: id, activeSheet: $activeSheet)
+        }
+    }
+}

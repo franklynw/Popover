@@ -31,3 +31,30 @@ struct DoIf: View {
         }
     }
 }
+
+
+struct DoIfLet<T: Identifiable>: View {
+    
+    private var activeSheet: Binding<T?>
+    private let action: () -> ()
+    private let otherAction: (() -> ())?
+    
+    
+    init(_ activeSheet: Binding<T?>, _ action: @escaping () -> (), else otherAction: (() -> ())? = nil) {
+        self.activeSheet = activeSheet
+        self.action = action
+        self.otherAction = otherAction
+    }
+    
+    var body: some View {
+        
+        return IfLet(activeSheet) { () -> EmptyView in
+            self.action()
+            return EmptyView()
+        } else: { () -> EmptyView in
+            self.otherAction?()
+            return EmptyView()
+        }
+    }
+}
+

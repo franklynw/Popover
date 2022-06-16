@@ -47,3 +47,19 @@ extension Popover {
         return copy
     }
 }
+
+
+extension PopoverSheet {
+    
+    public func userInterfaceStyle(_ userInterfaceStyle: UIUserInterfaceStyle) -> Self {
+        var copy = self
+        copy.userInterfaceStyle = userInterfaceStyle
+        return copy
+    }
+    
+    public func environmentObject(_ object: EnvironmentObject) -> Self {
+        var copy = self
+        copy.environmentObject = object
+        return copy
+    }
+}

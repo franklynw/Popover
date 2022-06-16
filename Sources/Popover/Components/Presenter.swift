@@ -67,3 +67,64 @@ class Presenter {
         }
     }
 }
+
+
+class ActiveSheetPresenter {
+    
+    private static var window: UIWindow?
+    private static var viewController: UIViewController?
+    private static var presenting: [String: Any] = [:]
+    
+    static func present<Content, T: Identifiable, EnvironmentObject: ObservableObject>(with parent: PopoverSheet<Content, T, EnvironmentObject>, activeSheet: Binding<T?>) {
+        
+        guard let appWindow = UIApplication.window else {
+            return
+        }
+        
+        UIApplication.endEditing()
+        
+        let id = parent.id
+        let style = parent.style
+        
+        presenting[id] = activeSheet
+        
+        let popoverViewController = PopoverSheetViewController<Content, T, EnvironmentObject>(for: id, activeSheet: activeSheet, style: style)
+        
+        if let windowScene = appWindow.windowScene {
+            
+            let newWindow = UIWindow(windowScene: windowScene)
+            newWindow.rootViewController = popoverViewController
+            
+            window = newWindow
+            window?.alpha = 0
+            window?.backgroundColor = UIColor.black.withAlphaComponent(0.1)
+            window?.makeKeyAndVisible()
+            
+            viewController = popoverViewController
+            
+            popoverViewController.present(with: parent) {
+                UIView.animate(withDuration: 0.3) {
+                    window?.alpha = 1
+                }
+            }
+        }
+    }
+    
+    static func dismiss<T: Identifiable>(for id: String, activeSheet: Binding<T?>) {
+        
+        guard window != nil, presenting[id] != nil else {
+            return
+        }
+        
+        UIView.animate(withDuration: 0.3) {
+            window?.alpha = 0
+            viewController?.view.alpha = 0
+        } completion: { _ in
+            viewController?.view.removeFromSuperview()
+            window?.isHidden = true
+            viewController = nil
+            (presenting[id] as? Binding<T?>)?.wrappedValue = nil
+            presenting.removeValue(forKey: id)
+        }
+    }
+}

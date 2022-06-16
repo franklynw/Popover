@@ -21,3 +21,23 @@ struct If: View {
         return viewProvider()
     }
 }
+
+
+struct IfLet<T: Identifiable>: View {
+    
+    private let viewProvider: () -> AnyView
+    
+    init<V: View, O: View>(_ activeSheet: Binding<T?>, @ViewBuilder _ viewProvider: @escaping () -> V, @ViewBuilder else otherViewProvider: @escaping () -> O) {
+        self.viewProvider = {
+            if let _ = activeSheet.wrappedValue {
+                return AnyView(viewProvider())
+            } else {
+                return AnyView(otherViewProvider())
+            }
+        }
+    }
+    
+    var body: some View {
+        return viewProvider()
+    }
+}
