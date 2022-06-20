@@ -85,6 +85,10 @@ class PopoverViewController<Content: View>: UIViewController, UIPopoverPresentat
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
         .none
     }
+    
+    func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
+        .none
+    }
 }
 
 
@@ -169,6 +173,10 @@ class PopoverSheetViewController<Content: View, T: Identifiable, EnvironmentObje
     }
     
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        .none
+    }
+    
+    func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
         .none
     }
 }
