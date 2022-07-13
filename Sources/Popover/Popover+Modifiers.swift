@@ -16,17 +16,17 @@ extension View where Self: Identifiable, ID == String {
     /// - Parameters:
     ///   - isPresented: binding to a Bool which controls whether or not to show the picker
     ///   - style: the popover's content style
-    public func popover<Content: View>(isPresented: Binding<Bool>, style: PopoverStyle<Content>) -> some View {
-        modifier(PopoverPresentationModifier(content: { Popover(forId: self.id, isPresented: isPresented, style: style)}))
+    public func popover<Content: View, EnvironmentObject: ObservableObject>(isPresented: Binding<Bool>, style: PopoverStyle<Content>) -> some View {
+        modifier(PopoverPresentationModifier(content: { Popover<Content, EnvironmentObject>(forId: self.id, isPresented: isPresented, style: style)}))
     }
 }
 
 
-struct PopoverPresentationModifier<PopoverContent>: ViewModifier where PopoverContent: View {
+struct PopoverPresentationModifier<PopoverContent, EnvironmentObject>: ViewModifier where PopoverContent: View, EnvironmentObject: ObservableObject {
     
-    var content: () -> Popover<PopoverContent>
+    var content: () -> Popover<PopoverContent, EnvironmentObject>
     
-    init(@ViewBuilder content: @escaping () -> Popover<PopoverContent>) {
+    init(@ViewBuilder content: @escaping () -> Popover<PopoverContent, EnvironmentObject>) {
         self.content = content
     }
     
@@ -44,6 +44,12 @@ extension Popover {
     public func userInterfaceStyle(_ userInterfaceStyle: UIUserInterfaceStyle) -> Self {
         var copy = self
         copy.userInterfaceStyle = userInterfaceStyle
+        return copy
+    }
+    
+    public func environmentObject(_ object: EnvironmentObject) -> Self {
+        var copy = self
+        copy.environmentObject = object
         return copy
     }
 }

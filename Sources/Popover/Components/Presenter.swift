@@ -14,7 +14,7 @@ class Presenter {
     private static var viewController: UIViewController?
     private static var presenting: [String: Binding<Bool>] = [:]
     
-    static func present<Content>(with parent: Popover<Content>, isPresented: Binding<Bool>) {
+    static func present<Content, EnvironmentObject: ObservableObject>(with parent: Popover<Content, EnvironmentObject>, isPresented: Binding<Bool>) {
         
         guard let appWindow = UIApplication.window else {
             return
@@ -27,7 +27,7 @@ class Presenter {
         
         presenting[id] = isPresented
         
-        let popoverViewController = PopoverViewController(for: id, style: style)
+        let popoverViewController = PopoverViewController<Content, EnvironmentObject>(for: id, style: style)
         
         if let windowScene = appWindow.windowScene {
             

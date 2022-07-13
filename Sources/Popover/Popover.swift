@@ -7,7 +7,7 @@
 import SwiftUI
 
 
-public struct Popover<Content: View>: View {
+public struct Popover<Content: View, EnvironmentObject: ObservableObject>: View {
     
     @Binding private var isPresented: Bool
     
@@ -15,6 +15,7 @@ public struct Popover<Content: View>: View {
     internal let style: PopoverStyle<Content>
     
     internal var userInterfaceStyle: UIUserInterfaceStyle = .unspecified
+    internal var environmentObject: EnvironmentObject?
     
     
     public init(forId id: String, isPresented: Binding<Bool>, style: PopoverStyle<Content>) {

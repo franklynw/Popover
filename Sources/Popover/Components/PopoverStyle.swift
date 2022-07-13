@@ -15,6 +15,7 @@ public enum PopoverStyle<Content: View> {
     case medium(content: () -> Content)
     case large(content: () -> Content)
     case extraLarge(content: () -> Content)
+    case fullScreen(content: () -> Content)
     case notification(content: PopoverNotificationContent)
     case customSize(size: CGSize, content: () -> Content)
     case customProportion(proportion: CGSize, content: () -> Content)
@@ -50,6 +51,8 @@ public enum PopoverStyle<Content: View> {
             return CGSize(width: width * 0.8, height: height * 0.7)
         case .extraLarge:
             return CGSize(width: width * 0.9, height: height * 0.9)
+        case .fullScreen:
+            return CGSize(width: width, height: height)
         case .notification(let content):
             
             let popupHeight = NotificationViewController.height(for: content, inContainerWidth: width * 0.8)
@@ -73,7 +76,7 @@ public enum PopoverStyle<Content: View> {
         switch self {
         case .none, .system, .tiny, .small, .medium, .large:
             return CGPoint(x: width / 2, y: height * 0.45)
-        case .extraLarge:
+        case .extraLarge, .fullScreen:
             return CGPoint(x: width / 2, y: height / 2)
         case .notification:
             return CGPoint(x: width / 2, y: height * 0.1)
@@ -86,7 +89,7 @@ public enum PopoverStyle<Content: View> {
     
     var content: (() -> Content)? {
         switch self {
-        case .system(let content), .tiny(let content), .small(let content), .medium(let content), .large(let content), .extraLarge(let content), .customSize(_, let content), .customProportion(_, let content):
+        case .system(let content), .tiny(let content), .small(let content), .medium(let content), .large(let content), .extraLarge(let content), .fullScreen(let content), .customSize(_, let content), .customProportion(_, let content):
             return content
         case .notification, .none:
             return nil

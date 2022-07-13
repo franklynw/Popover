@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-class PopoverViewController<Content: View>: UIViewController, UIPopoverPresentationControllerDelegate {
+class PopoverViewController<Content: View, EnvironmentObject: ObservableObject>: UIViewController, UIPopoverPresentationControllerDelegate {
     
     private let id: String
     private let style: PopoverStyle<Content>
@@ -26,7 +26,7 @@ class PopoverViewController<Content: View>: UIViewController, UIPopoverPresentat
         fatalError("init(coder:) has not been implemented")
     }
 
-    func present(with parent: Popover<Content>, completion: @escaping () -> ()) {
+    func present(with parent: Popover<Content, EnvironmentObject>, completion: @escaping () -> ()) {
         
         var viewController: UIViewController
         
@@ -40,7 +40,11 @@ class PopoverViewController<Content: View>: UIViewController, UIPopoverPresentat
             guard let content = style.content else {
                 return
             }
-            viewController = UIHostingController(rootView: content())
+            if let environmentObject = parent.environmentObject {
+                viewController = UIHostingController(rootView: content().environmentObject(environmentObject))
+            } else {
+                viewController = UIHostingController(rootView: content())
+            }
         }
         
         viewController.modalPresentationStyle = .popover
