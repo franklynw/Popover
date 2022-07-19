@@ -17,6 +17,8 @@ public struct Popover<Content: View, EnvironmentObject: ObservableObject>: View 
     internal var userInterfaceStyle: UIUserInterfaceStyle = .unspecified
     internal var environmentObject: EnvironmentObject?
     
+    internal var dismissed: (() -> ())?
+    
     
     public init(forId id: String, isPresented: Binding<Bool>, style: PopoverStyle<Content>) {
         self.id = id
@@ -29,7 +31,7 @@ public struct Popover<Content: View, EnvironmentObject: ObservableObject>: View 
         DoIf($isPresented) {
             Presenter.present(with: self, isPresented: $isPresented)
         } else: {
-            Presenter.dismiss(for: id)
+            Presenter.dismiss(for: id, dismissed: dismissed)
         }
     }
 }
@@ -45,6 +47,8 @@ public struct PopoverSheet<Content: View, T: Identifiable, EnvironmentObject: Ob
     internal var userInterfaceStyle: UIUserInterfaceStyle = .unspecified
     internal var environmentObject: EnvironmentObject?
     
+    internal var dismissed: (() -> ())?
+    
     
     public init(forId id: String, activeSheet: Binding<T?>, style: PopoverStyle<Content>) {
         self.id = id
@@ -58,7 +62,7 @@ public struct PopoverSheet<Content: View, T: Identifiable, EnvironmentObject: Ob
         DoIfLet($activeSheet) {
             ActiveSheetPresenter.present(with: self, activeSheet: $activeSheet)
         } else: {
-            ActiveSheetPresenter.dismiss(for: id, activeSheet: $activeSheet)
+            ActiveSheetPresenter.dismiss(for: id, activeSheet: $activeSheet, dismissed: dismissed)
         }
     }
 }

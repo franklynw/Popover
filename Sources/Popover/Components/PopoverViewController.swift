@@ -12,6 +12,8 @@ class PopoverViewController<Content: View, EnvironmentObject: ObservableObject>:
     
     private let id: String
     private let style: PopoverStyle<Content>
+    
+    var dismissed: (() -> ())?
 
     
     init(for id: String, style: PopoverStyle<Content>) {
@@ -25,7 +27,11 @@ class PopoverViewController<Content: View, EnvironmentObject: ObservableObject>:
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
+    deinit {
+        print("deinit PopoverViewController")
+    }
+    
     func present(with parent: Popover<Content, EnvironmentObject>, completion: @escaping () -> ()) {
         
         var viewController: UIViewController
@@ -70,7 +76,7 @@ class PopoverViewController<Content: View, EnvironmentObject: ObservableObject>:
             
             if case .notification(let content) = self.style, let time = content.duration.time {
                 DispatchQueue.main.asyncAfter(deadline: .now() + time) {
-                    Presenter.dismiss(for: self.id)
+                    Presenter.dismiss(for: self.id, dismissed: self.dismissed)
                 }
             }
             
@@ -79,11 +85,11 @@ class PopoverViewController<Content: View, EnvironmentObject: ObservableObject>:
     }
     
     func dismiss() {
-        Presenter.dismiss(for: id)
+        Presenter.dismiss(for: id, dismissed: dismissed)
     }
     
     func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
-        Presenter.dismiss(for: id)
+        Presenter.dismiss(for: id, dismissed: dismissed)
     }
     
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
@@ -101,6 +107,8 @@ class PopoverSheetViewController<Content: View, T: Identifiable, EnvironmentObje
     private let id: String
     private let style: PopoverStyle<Content>
     private var activeSheet: Binding<T?>
+    
+    var dismissed: (() -> ())?
 
     
     init(for id: String, activeSheet: Binding<T?>, style: PopoverStyle<Content>) {
@@ -114,6 +122,10 @@ class PopoverSheetViewController<Content: View, T: Identifiable, EnvironmentObje
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        print("deinit PopoverSheetViewController")
     }
 
     func present(with parent: PopoverSheet<Content, T, EnvironmentObject>, completion: @escaping () -> ()) {
@@ -160,7 +172,7 @@ class PopoverSheetViewController<Content: View, T: Identifiable, EnvironmentObje
             
             if case .notification(let content) = self.style, let time = content.duration.time {
                 DispatchQueue.main.asyncAfter(deadline: .now() + time) {
-                    ActiveSheetPresenter.dismiss(for: self.id, activeSheet: self.activeSheet)
+                    ActiveSheetPresenter.dismiss(for: self.id, activeSheet: self.activeSheet, dismissed: self.dismissed)
                 }
             }
             
@@ -169,11 +181,11 @@ class PopoverSheetViewController<Content: View, T: Identifiable, EnvironmentObje
     }
     
     func dismiss() {
-        ActiveSheetPresenter.dismiss(for: id, activeSheet: activeSheet)
+        ActiveSheetPresenter.dismiss(for: id, activeSheet: activeSheet, dismissed: dismissed)
     }
     
     func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
-        ActiveSheetPresenter.dismiss(for: id, activeSheet: activeSheet)
+        ActiveSheetPresenter.dismiss(for: id, activeSheet: activeSheet, dismissed: dismissed)
     }
     
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {

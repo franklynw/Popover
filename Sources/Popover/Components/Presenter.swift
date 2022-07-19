@@ -11,7 +11,7 @@ import SwiftUI
 class Presenter {
     
     private static var window: UIWindow?
-    private static var viewController: UIViewController?
+    private static weak var viewController: UIViewController?
     private static var presenting: [String: Binding<Bool>] = [:]
     
     static func present<Content, EnvironmentObject: ObservableObject>(with parent: Popover<Content, EnvironmentObject>, isPresented: Binding<Bool>) {
@@ -28,6 +28,7 @@ class Presenter {
         presenting[id] = isPresented
         
         let popoverViewController = PopoverViewController<Content, EnvironmentObject>(for: id, style: style)
+        popoverViewController.dismissed = parent.dismissed
         
         if let windowScene = appWindow.windowScene {
             
@@ -49,7 +50,7 @@ class Presenter {
         }
     }
     
-    static func dismiss(for id: String) {
+    static func dismiss(for id: String, dismissed: (() -> ())?) {
         
         guard window != nil, presenting[id] != nil else {
             return
@@ -62,8 +63,10 @@ class Presenter {
             viewController?.view.removeFromSuperview()
             window?.isHidden = true
             viewController = nil
+            window?.rootViewController = nil
             presenting[id]?.wrappedValue = false
             presenting.removeValue(forKey: id)
+            dismissed?()
         }
     }
 }
@@ -72,7 +75,7 @@ class Presenter {
 class ActiveSheetPresenter {
     
     private static var window: UIWindow?
-    private static var viewController: UIViewController?
+    private static weak var viewController: UIViewController?
     private static var presenting: [String: Any] = [:]
     
     static func present<Content, T: Identifiable, EnvironmentObject: ObservableObject>(with parent: PopoverSheet<Content, T, EnvironmentObject>, activeSheet: Binding<T?>) {
@@ -89,6 +92,7 @@ class ActiveSheetPresenter {
         presenting[id] = activeSheet
         
         let popoverViewController = PopoverSheetViewController<Content, T, EnvironmentObject>(for: id, activeSheet: activeSheet, style: style)
+        popoverViewController.dismissed = parent.dismissed
         
         if let windowScene = appWindow.windowScene {
             
@@ -110,7 +114,7 @@ class ActiveSheetPresenter {
         }
     }
     
-    static func dismiss<T: Identifiable>(for id: String, activeSheet: Binding<T?>) {
+    static func dismiss<T: Identifiable>(for id: String, activeSheet: Binding<T?>, dismissed: (() -> ())?) {
         
         guard window != nil, presenting[id] != nil else {
             return
@@ -123,8 +127,10 @@ class ActiveSheetPresenter {
             viewController?.view.removeFromSuperview()
             window?.isHidden = true
             viewController = nil
+            window?.rootViewController = nil
             (presenting[id] as? Binding<T?>)?.wrappedValue = nil
             presenting.removeValue(forKey: id)
+            dismissed?()
         }
     }
 }

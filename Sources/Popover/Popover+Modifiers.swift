@@ -52,6 +52,12 @@ extension Popover {
         copy.environmentObject = object
         return copy
     }
+    
+    public func dismissed(_ dismissed: @escaping () -> ()) -> Self {
+        var copy = self
+        copy.dismissed = dismissed
+        return copy
+    }
 }
 
 
@@ -66,6 +72,12 @@ extension PopoverSheet {
     public func environmentObject(_ object: EnvironmentObject) -> Self {
         var copy = self
         copy.environmentObject = object
+        return copy
+    }
+    
+    public func dismissed(_ dismissed: @escaping () -> ()) -> Self {
+        var copy = self
+        copy.dismissed = dismissed
         return copy
     }
 }
