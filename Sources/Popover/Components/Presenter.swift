@@ -16,7 +16,7 @@ class Presenter {
     
     static func present<Content, EnvironmentObject: ObservableObject>(with parent: Popover<Content, EnvironmentObject>, isPresented: Binding<Bool>) {
         
-        guard let appWindow = UIApplication.window else {
+        guard let appWindow = UIApplication.window, Self.presenting[parent.id] == nil else {
             return
         }
         
@@ -80,7 +80,7 @@ class ActiveSheetPresenter {
     
     static func present<Content, T: Identifiable, EnvironmentObject: ObservableObject>(with parent: PopoverSheet<Content, T, EnvironmentObject>, activeSheet: Binding<T?>) {
         
-        guard let appWindow = UIApplication.window else {
+        guard let appWindow = UIApplication.window, Self.presenting[parent.id] == nil else {
             return
         }
         
