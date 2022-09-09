@@ -9,89 +9,76 @@ import SwiftUI
 
 
 public enum PopoverStyle<Content: View> {
-    case system(content: () -> Content)
     case tiny(content: () -> Content)
     case small(content: () -> Content)
     case medium(content: () -> Content)
     case large(content: () -> Content)
     case extraLarge(content: () -> Content)
     case fullScreen(content: () -> Content)
-    case notification(content: PopoverNotificationContent)
-    case customSize(size: CGSize, content: () -> Content)
-    case customProportion(proportion: CGSize, content: () -> Content)
+//    case notification(content: PopoverNotificationContent)
+    case custom(size: CGSize, yOffset: CGFloat, content: () -> Content)
     case none
     
-    public static func notification(_ content: PopoverNotificationContent) -> PopoverStyle<AnyView> {
-        return .notification(content: content)
-    }
-    public static func customSize(_ size: CGSize, content: @escaping () -> Content) -> PopoverStyle<Content> {
-        return .customSize(size: size, content: content)
-    }
-    public static func customProportion(_ proportion: CGSize, content: @escaping () -> Content) -> PopoverStyle<Content> {
-        return .customProportion(proportion: proportion, content: content)
+//    public static func notification(_ content: PopoverNotificationContent) -> PopoverStyle<AnyView> {
+//        return .notification(content: content)
+//    }
+    public static func custom(_ size: CGSize, yOffset: CGFloat, content: @escaping () -> Content) -> PopoverStyle<Content> {
+        return .custom(size: size, yOffset: yOffset, content: content)
     }
     
     
-    var size: CGSize? {
-        
-        let screenSize = UIScreen.main.bounds.size
-        let width = screenSize.width
-        let height = screenSize.height
+    var size: CGSize {
         
         switch self {
-        case .system:
-            return nil
         case .tiny:
-            return CGSize(width: width * 0.4, height: height * 0.2)
+            return CGSize(width: 0.4, height: 0.2)
         case .small:
-            return CGSize(width: width * 0.5, height: height * 0.3)
+            return CGSize(width: 0.5, height: 0.3)
         case .medium:
-            return CGSize(width: width * 0.6, height: height * 0.5)
+            return CGSize(width: 0.6, height: 0.5)
         case .large:
-            return CGSize(width: width * 0.8, height: height * 0.7)
+            return CGSize(width: 0.8, height: 0.7)
         case .extraLarge:
-            return CGSize(width: width * 0.9, height: height * 0.9)
+            return CGSize(width: 0.9, height: 0.9)
         case .fullScreen:
-            return CGSize(width: width, height: height)
-        case .notification(let content):
+            return CGSize(width: 1, height: 1)
+//        case .notification(let content):
+//
+//            let popupHeight = NotificationViewController.height(for: content, inContainerWidth: width * 0.8)
+//            return CGSize(width: width * 0.8, height: popupHeight)
             
-            let popupHeight = NotificationViewController.height(for: content, inContainerWidth: width * 0.8)
-            return CGSize(width: width * 0.8, height: popupHeight)
-            
-        case .customSize(let size, _):
+        case .custom(let size, _, _):
             return CGSize(width: size.width, height: size.height)
-        case .customProportion(let proportion, _):
-            return CGSize(width: width * proportion.width, height: height * proportion.height)
         case .none:
-            return nil
+            return .zero
         }
     }
     
-    var offset: CGPoint {
-        
-        let screenSize = UIScreen.main.bounds.size
-        let width = screenSize.width
-        let height = screenSize.height
+    var yOffset: CGFloat {
         
         switch self {
-        case .none, .system, .tiny, .small, .medium, .large:
-            return CGPoint(x: width / 2, y: height * 0.45)
+        case .tiny, .small, .medium:
+            return 0.1
+        case .large:
+            return 0.05
         case .extraLarge, .fullScreen:
-            return CGPoint(x: width / 2, y: height / 2)
-        case .notification:
-            return CGPoint(x: width / 2, y: height * 0.1)
-        case .customSize(let size, _):
-            return CGPoint(x: width / 2, y: (height - size.height) * 0.45)
-        case .customProportion(let proportion, _):
-            return CGPoint(x: width / 2, y: (height - height * proportion.height) * 0.45)
+            return 0
+//        case .notification:
+//            return 0.4
+        case .custom(_, let yOffset, _):
+            return yOffset
+        case .none:
+            return 0
         }
     }
     
     var content: (() -> Content)? {
         switch self {
-        case .system(let content), .tiny(let content), .small(let content), .medium(let content), .large(let content), .extraLarge(let content), .fullScreen(let content), .customSize(_, let content), .customProportion(_, let content):
+        case .tiny(let content), .small(let content), .medium(let content), .large(let content), .extraLarge(let content), .fullScreen(let content), .custom(_, _, let content):
             return content
-        case .notification, .none:
+//        case .notification:
+//            return nil
+        case .none:
             return nil
         }
     }

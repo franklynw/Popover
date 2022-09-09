@@ -29,6 +29,7 @@ class Presenter {
         
         let popoverViewController = PopoverViewController<Content, EnvironmentObject>(for: id, style: style)
         popoverViewController.dismissed = parent.dismissed
+        popoverViewController.present(with: parent)
         
         if let windowScene = appWindow.windowScene {
             
@@ -42,10 +43,8 @@ class Presenter {
             
             viewController = popoverViewController
             
-            popoverViewController.present(with: parent) {
-                UIView.animate(withDuration: 0.3) {
-                    window?.alpha = 1
-                }
+            UIView.animate(withDuration: 0.3) {
+                window?.alpha = 1
             }
         }
     }
@@ -93,6 +92,7 @@ class ActiveSheetPresenter {
         
         let popoverViewController = PopoverSheetViewController<Content, T, EnvironmentObject>(for: id, activeSheet: activeSheet, style: style)
         popoverViewController.dismissed = parent.dismissed
+        popoverViewController.present(with: parent)
         
         if let windowScene = appWindow.windowScene {
             
@@ -106,10 +106,8 @@ class ActiveSheetPresenter {
             
             viewController = popoverViewController
             
-            popoverViewController.present(with: parent) {
-                UIView.animate(withDuration: 0.3) {
-                    window?.alpha = 1
-                }
+            UIView.animate(withDuration: 0.3) {
+                window?.alpha = 1
             }
         }
     }

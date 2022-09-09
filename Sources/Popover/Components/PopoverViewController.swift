@@ -6,12 +6,17 @@
 //
 
 import SwiftUI
+import Combine
 
 
-class PopoverViewController<Content: View, EnvironmentObject: ObservableObject>: UIViewController, UIPopoverPresentationControllerDelegate {
+class PopoverViewController<Content: View, EnvironmentObject: ObservableObject>: UIViewController {
     
     private let id: String
     private let style: PopoverStyle<Content>
+    
+    private var keyboardObserverCancellable: AnyCancellable!
+    private var heightConstraint: NSLayoutConstraint?
+    private var centerYConstraint: NSLayoutConstraint?
     
     var dismissed: (() -> ())?
 
@@ -32,72 +37,94 @@ class PopoverViewController<Content: View, EnvironmentObject: ObservableObject>:
         print("deinit PopoverViewController")
     }
     
-    func present(with parent: Popover<Content, EnvironmentObject>, completion: @escaping () -> ()) {
+    func present(with parent: Popover<Content, EnvironmentObject>) {
         
-        var viewController: UIViewController
-        
-        switch style {
-        case .notification(let content):
-            let storyboard = UIStoryboard(name: "NotificationViewController", bundle: Bundle.module)
-            let notificationViewController = storyboard.instantiateInitialViewController() as! NotificationViewController
-            notificationViewController.content = content
-            viewController = notificationViewController
-        default:
-            guard let content = style.content else {
-                return
-            }
-            if let environmentObject = parent.environmentObject {
-                viewController = UIHostingController(rootView: content().environmentObject(environmentObject))
-            } else {
-                viewController = UIHostingController(rootView: content())
-            }
+        guard let content = style.content else {
+            return
         }
         
-        viewController.modalPresentationStyle = .popover
-        viewController.overrideUserInterfaceStyle = parent.userInterfaceStyle
+        let presentingView = UIView()
         
-        if let popoverSize = style.size {
-            viewController.preferredContentSize = popoverSize
+        presentingView.translatesAutoresizingMaskIntoConstraints = false
+        presentingView.layer.cornerRadius = 10
+        presentingView.layer.masksToBounds = true
+        
+        view.addSubview(presentingView)
+        
+        heightConstraint = presentingView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: style.size.height)
+        heightConstraint?.isActive = true
+        centerYConstraint = presentingView.centerYAnchor.anchorWithOffset(to: view.centerYAnchor).constraint(equalTo: view.heightAnchor, multiplier: style.yOffset)
+        centerYConstraint?.isActive = true
+        
+        NSLayoutConstraint.activate([
+            presentingView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: style.size.width),
+            presentingView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+        
+        let contentViewController: UIViewController
+        if let environmentObject = parent.environmentObject {
+            contentViewController = UIHostingController(rootView: content().environmentObject(environmentObject))
+        } else {
+            contentViewController = UIHostingController(rootView: content())
         }
         
-        if let popover = viewController.popoverPresentationController {
-            popover.sourceView = view
-            popover.sourceRect = CGRect(origin: style.offset, size: .zero)
-            popover.delegate = self
-            popover.permittedArrowDirections = []
-            popover.backgroundColor = .clear
-        }
+        contentViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        contentViewController.view.layer.cornerRadius = 10
+        contentViewController.view.layer.masksToBounds = true
         
-        present(viewController, animated: false) { [weak self] in
-            
-            guard let self = self else {
-                return
-            }
-            
-            if case .notification(let content) = self.style, let time = content.duration.time {
-                DispatchQueue.main.asyncAfter(deadline: .now() + time) {
-                    Presenter.dismiss(for: self.id, dismissed: self.dismissed)
+        presentingView.addSubview(contentViewController.view)
+        
+        NSLayoutConstraint.activate([
+            presentingView.leadingAnchor.constraint(equalTo: contentViewController.view.leadingAnchor),
+            presentingView.trailingAnchor.constraint(equalTo: contentViewController.view.trailingAnchor),
+            presentingView.topAnchor.constraint(equalTo: contentViewController.view.topAnchor),
+            presentingView.bottomAnchor.constraint(equalTo: contentViewController.view.bottomAnchor)
+        ])
+        
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped))
+        view.addGestureRecognizer(tapGestureRecognizer)
+        
+        keyboardObserverCancellable = KeyboardResponder.shared.$keyboardState
+            .sink { [weak self] keyboardState in
+                
+                guard let self = self else {
+                    return
+                }
+                
+                switch keyboardState {
+                case .hidden:
+                    self.heightConstraint?.constant = 0
+                    self.centerYConstraint?.constant = 0
+                case .shown(let keyboardRect):
+                    
+                    let frameHeight = self.view.frame.height
+                    let height = frameHeight * self.style.size.height
+                    let yOffset = frameHeight * self.style.yOffset
+                    let top = (frameHeight - height) / 2 - yOffset
+                    let bottom = top + height
+                    let keyboardHeight = keyboardRect.height
+                    let adjustment = frameHeight - keyboardHeight - bottom
+                    let landscapeAdjustment = frameHeight < self.view.frame.width ? top * 0.6 : 0
+                    
+                    if adjustment < 0 {
+                        self.heightConstraint?.constant = adjustment + landscapeAdjustment
+                        self.centerYConstraint?.constant = -adjustment / 2 + landscapeAdjustment
+                    }
+                }
+                
+                UIView.animate(withDuration: 0.3) {
+                    self.view.layoutIfNeeded()
                 }
             }
-            
-            completion()
-        }
     }
     
     func dismiss() {
         Presenter.dismiss(for: id, dismissed: dismissed)
     }
     
-    func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
-        Presenter.dismiss(for: id, dismissed: dismissed)
-    }
-    
-    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
-        .none
-    }
-    
-    func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
-        .none
+    @objc
+    private func backgroundTapped() {
+        dismiss()
     }
 }
 
@@ -107,6 +134,10 @@ class PopoverSheetViewController<Content: View, T: Identifiable, EnvironmentObje
     private let id: String
     private let style: PopoverStyle<Content>
     private var activeSheet: Binding<T?>
+    
+    private var keyboardObserverCancellable: AnyCancellable!
+    private var heightConstraint: NSLayoutConstraint?
+    private var centerYConstraint: NSLayoutConstraint?
     
     var dismissed: (() -> ())?
 
@@ -128,71 +159,93 @@ class PopoverSheetViewController<Content: View, T: Identifiable, EnvironmentObje
         print("deinit PopoverSheetViewController")
     }
 
-    func present(with parent: PopoverSheet<Content, T, EnvironmentObject>, completion: @escaping () -> ()) {
+    func present(with parent: PopoverSheet<Content, T, EnvironmentObject>) {
         
-        var viewController: UIViewController
-        
-        switch style {
-        case .notification(let content):
-            let storyboard = UIStoryboard(name: "NotificationViewController", bundle: Bundle.module)
-            let notificationViewController = storyboard.instantiateInitialViewController() as! NotificationViewController
-            notificationViewController.content = content
-            viewController = notificationViewController
-        default:
-            guard let content = style.content else {
-                return
-            }
-            if let environmentObject = parent.environmentObject {
-                viewController = UIHostingController(rootView: content().environmentObject(environmentObject))
-            } else {
-                viewController = UIHostingController(rootView: content())
-            }
+        guard let content = style.content else {
+            return
         }
         
-        viewController.modalPresentationStyle = .popover
-        viewController.overrideUserInterfaceStyle = parent.userInterfaceStyle
+        let presentingView = UIView()
         
-        if let popoverSize = style.size {
-            viewController.preferredContentSize = popoverSize
+        presentingView.translatesAutoresizingMaskIntoConstraints = false
+        presentingView.layer.cornerRadius = 10
+        presentingView.layer.masksToBounds = true
+        
+        view.addSubview(presentingView)
+        
+        heightConstraint = presentingView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: style.size.height)
+        heightConstraint?.isActive = true
+        centerYConstraint = presentingView.centerYAnchor.anchorWithOffset(to: view.centerYAnchor).constraint(equalTo: view.heightAnchor, multiplier: style.yOffset)
+        centerYConstraint?.isActive = true
+        
+        NSLayoutConstraint.activate([
+            presentingView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: style.size.width),
+            presentingView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+        
+        let contentViewController: UIViewController
+        if let environmentObject = parent.environmentObject {
+            contentViewController = UIHostingController(rootView: content().environmentObject(environmentObject))
+        } else {
+            contentViewController = UIHostingController(rootView: content())
         }
         
-        if let popover = viewController.popoverPresentationController {
-            popover.sourceView = view
-            popover.sourceRect = CGRect(origin: style.offset, size: .zero)
-            popover.delegate = self
-            popover.permittedArrowDirections = []
-            popover.backgroundColor = .clear
-        }
+        contentViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        contentViewController.view.layer.cornerRadius = 10
+        contentViewController.view.layer.masksToBounds = true
         
-        present(viewController, animated: false) { [weak self] in
-            
-            guard let self = self else {
-                return
-            }
-            
-            if case .notification(let content) = self.style, let time = content.duration.time {
-                DispatchQueue.main.asyncAfter(deadline: .now() + time) {
-                    ActiveSheetPresenter.dismiss(for: self.id, activeSheet: self.activeSheet, dismissed: self.dismissed)
+        presentingView.addSubview(contentViewController.view)
+        
+        NSLayoutConstraint.activate([
+            presentingView.leadingAnchor.constraint(equalTo: contentViewController.view.leadingAnchor),
+            presentingView.trailingAnchor.constraint(equalTo: contentViewController.view.trailingAnchor),
+            presentingView.topAnchor.constraint(equalTo: contentViewController.view.topAnchor),
+            presentingView.bottomAnchor.constraint(equalTo: contentViewController.view.bottomAnchor)
+        ])
+        
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped))
+        view.addGestureRecognizer(tapGestureRecognizer)
+        
+        keyboardObserverCancellable = KeyboardResponder.shared.$keyboardState
+            .sink { [weak self] keyboardState in
+                
+                guard let self = self else {
+                    return
+                }
+                
+                switch keyboardState {
+                case .hidden:
+                    self.heightConstraint?.constant = 0
+                    self.centerYConstraint?.constant = 0
+                case .shown(let keyboardRect):
+                    
+                    let frameHeight = self.view.frame.height
+                    let height = frameHeight * self.style.size.height
+                    let yOffset = frameHeight * self.style.yOffset
+                    let top = (frameHeight - height) / 2 - yOffset
+                    let bottom = top + height
+                    let keyboardHeight = keyboardRect.height
+                    let adjustment = frameHeight - keyboardHeight - bottom
+                    let landscapeAdjustment = frameHeight < self.view.frame.width ? top * 0.6 : 0
+                    
+                    if adjustment < 0 {
+                        self.heightConstraint?.constant = adjustment + landscapeAdjustment
+                        self.centerYConstraint?.constant = -adjustment / 2 + landscapeAdjustment
+                    }
+                }
+                
+                UIView.animate(withDuration: 0.3) {
+                    self.view.layoutIfNeeded()
                 }
             }
-            
-            completion()
-        }
     }
     
     func dismiss() {
         ActiveSheetPresenter.dismiss(for: id, activeSheet: activeSheet, dismissed: dismissed)
     }
     
-    func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
-        ActiveSheetPresenter.dismiss(for: id, activeSheet: activeSheet, dismissed: dismissed)
-    }
-    
-    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
-        .none
-    }
-    
-    func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
-        .none
+    @objc
+    private func backgroundTapped() {
+        dismiss()
     }
 }
