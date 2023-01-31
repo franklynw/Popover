@@ -81,6 +81,9 @@ class PopoverViewController<Content: View, EnvironmentObject: ObservableObject>:
             presentingView.bottomAnchor.constraint(equalTo: contentViewController.view.bottomAnchor)
         ])
         
+        let interceptGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(intercept))
+        presentingView.addGestureRecognizer(interceptGestureRecognizer)
+        
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped))
         view.addGestureRecognizer(tapGestureRecognizer)
         
@@ -125,6 +128,11 @@ class PopoverViewController<Content: View, EnvironmentObject: ObservableObject>:
     @objc
     private func backgroundTapped() {
         dismiss()
+    }
+    
+    @objc
+    private func intercept() {
+        // nothing
     }
 }
 
